@@ -1,0 +1,100 @@
+========================================
+塔罗牌图片命名参考
+========================================
+
+请将78张图片按以下命名放入对应文件夹：
+
+【大阿卡纳 - 放入 major 文件夹】
+00-fool.jpg        愚人
+01-magician.jpg    魔术师
+02-priestess.jpg   女祭司
+03-empress.jpg     皇后
+04-emperor.jpg     皇帝
+05-hierophant.jpg  教皇
+06-lovers.jpg      恋人
+07-chariot.jpg     战车
+08-strength.jpg    力量
+09-hermit.jpg      隐者
+10-wheel.jpg       命运之轮
+11-justice.jpg     正义
+12-hanged.jpg      倒吊人
+13-death.jpg       死神
+14-temperance.jpg  节制
+15-devil.jpg       恶魔
+16-tower.jpg       塔
+17-star.jpg        星星
+18-moon.jpg        月亮
+19-sun.jpg         太阳
+20-judgement.jpg   审判
+21-world.jpg       世界
+
+【权杖组 - 放入 wands 文件夹】
+ace.jpg    权杖首牌
+02.jpg     权杖二
+03.jpg     权杖三
+04.jpg     权杖四
+05.jpg     权杖五
+06.jpg     权杖六
+07.jpg     权杖七
+08.jpg     权杖八
+09.jpg     权杖九
+10.jpg     权杖十
+page.jpg   权杖侍从
+knight.jpg 权杖骑士
+queen.jpg  权杖皇后
+king.jpg   权杖国王
+
+【圣杯组 - 放入 cups 文件夹】
+ace.jpg    圣杯首牌
+02.jpg     圣杯二
+03.jpg     圣杯三
+04.jpg     圣杯四
+05.jpg     圣杯五
+06.jpg     圣杯六
+07.jpg     圣杯七
+08.jpg     圣杯八
+09.jpg     圣杯九
+10.jpg     圣杯十
+page.jpg   圣杯侍从
+knight.jpg 圣杯骑士
+queen.jpg  圣杯皇后
+king.jpg   圣杯国王
+
+【宝剑组 - 放入 swords 文件夹】
+ace.jpg    宝剑首牌
+02.jpg     宝剑二
+03.jpg     宝剑三
+04.jpg     宝剑四
+05.jpg     宝剑五
+06.jpg     宝剑六
+07.jpg     宝剑七
+08.jpg     宝剑八
+09.jpg     宝剑九
+10.jpg     宝剑十
+page.jpg   宝剑侍从
+knight.jpg 宝剑骑士
+queen.jpg  宝剑皇后
+king.jpg   宝剑国王
+
+【星币组 - 放入 pentacles 文件夹】
+ace.jpg    星币首牌
+02.jpg     星币二
+03.jpg     星币三
+04.jpg     星币四
+05.jpg     星币五
+06.jpg     星币六
+07.jpg     星币七
+08.jpg     星币八
+09.jpg     星币九
+10.jpg     星币十
+page.jpg   星币侍从
+knight.jpg 星币骑士
+queen.jpg  星币皇后
+king.jpg   星币国王
+
+========================================
+图片规格建议
+========================================
+格式：.jpg 或 .webp
+尺寸：300×500 像素（比例 3:5）
+文件大小：每张 < 100KB
