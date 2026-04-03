@@ -1282,6 +1282,163 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* 三行选牌区域样式 */
+        .u-selection-area {
+            display: none;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .u-selection-area.active {
+            display: block;
+        }
+
+        .u-cards-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            padding: var(--space-md);
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: center;
+            gap: var(--card-gap);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: var(--space-sm) 0;
+        }
+
+        .u-card {
+            flex-shrink: 0;
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: 12px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backface-visibility: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .u-card:hover {
+            transform: translateY(-20px) scale(1.05) !important;
+            box-shadow: 0 15px 40px var(--gold-glow);
+            z-index: 1000 !important;
+        }
+
+        .u-card.selected {
+            transform: translateY(-35px) scale(1.1) !important;
+            box-shadow: 0 20px 50px var(--gold-glow), 0 0 25px var(--gold-glow);
+            z-index: 1001 !important;
+        }
+
+        .u-card-face,
+        .u-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        .u-card-back {
+            background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 100%);
+            border: 3px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .u-card-back::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            opacity: 0.5;
+        }
+
+        .u-card-back::after {
+            content: '✦';
+            font-size: 3rem;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        .selection-info {
+            text-align: center;
+            margin-bottom: var(--space-md);
+            font-family: var(--font-display);
+        }
+
+        .selection-count {
+            font-size: 1.5rem;
+            color: var(--rose-dark);
+            margin-bottom: var(--space-xs);
+        }
+
+        .selection-hint {
+            color: var(--rose);
+            font-size: 0.95rem;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            margin-top: var(--space-lg);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--gold) 0%, #E8D5A3 100%);
+            color: var(--rose-dark);
+            padding: var(--space-sm) var(--space-xl);
+            font-family: var(--font-display);
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-elastic);
+        }
+
+        .btn-confirm:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px var(--gold-glow);
+        }
+
+        .btn-confirm:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .u-card {
+                width: 70px;
+                height: 116px;
+            }
+            
+            .card-row {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .u-card {
+                width: 55px;
+                height: 91px;
+            }
+            
+            .card-row {
+                gap: 6px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1389,6 +1546,24 @@
                     <span class="material-icons">touch_app</span>
                     抽牌
                 </button>
+            </div>
+
+            <div class="u-selection-area" id="step-u-selection">
+                <div class="selection-info">
+                    <div class="selection-count" id="selection-count">已选 0 / 需要 0 张</div>
+                    <div class="selection-hint">点击卡牌进行选择，再次点击可取消选择</div>
+                </div>
+                <div class="u-cards-container" id="u-cards-container"></div>
+                <div class="selection-actions">
+                    <button class="btn btn-secondary" onclick="app.goBackToShuffle()">
+                        <span class="material-icons">refresh</span>
+                        重新选牌
+                    </button>
+                    <button class="btn-confirm" id="btn-confirm-selection" onclick="app.confirmSelection()">
+                        <span class="material-icons">check_circle</span>
+                        确认选牌
+                    </button>
+                </div>
             </div>
 
             <div class="result-area" id="step-result">
@@ -1618,7 +1793,9 @@
                 drawnCards: [],
                 currentDrawIndex: 0,
                 dailyDrawn: false,
-                dailyCard: null
+                dailyCard: null,
+                shuffledCards: [],
+                selectedCards: []
             },
             spreadConfig: {
                 single: { name: '单张牌', cardCount: 1, positions: ['当前状况'] },
@@ -1739,9 +1916,12 @@
                 this.state.spreadType = null;
                 this.state.drawnCards = [];
                 this.state.currentDrawIndex = 0;
+                this.state.shuffledCards = [];
+                this.state.selectedCards = [];
                 document.getElementById('step-question').style.display = 'block';
                 document.getElementById('step-shuffle').classList.remove('active');
                 document.getElementById('step-draw').classList.remove('active');
+                document.getElementById('step-u-selection').classList.remove('active');
                 document.getElementById('step-result').classList.remove('active');
                 document.getElementById('question-input').value = '';
                 document.querySelectorAll('.spread-option').forEach(o => o.classList.remove('selected'));
@@ -1763,23 +1943,23 @@
                 setTimeout(() => this.startDraw(), 3000);
             },
             startDraw() {
-                this.state.readingStep = 'draw';
+                this.state.readingStep = 'u-selection';
                 document.getElementById('step-shuffle').classList.remove('active');
-                document.getElementById('step-draw').classList.add('active');
-                const slotsContainer = document.getElementById('draw-slots');
-                slotsContainer.innerHTML = '';
-                const config = this.spreadConfig[this.state.spreadType];
-                for (let i = 0; i < config.cardCount; i++) {
-                    const slot = document.createElement('div');
-                    slot.className = 'card-slot';
-                    slot.id = `slot-${i}`;
-                    slot.innerHTML = `
-                        <span class="slot-number">${i + 1}</span>
-                        <span class="slot-label">${config.positions[i]}</span>
-                    `;
-                    slotsContainer.appendChild(slot);
+                document.getElementById('step-u-selection').classList.add('active');
+                
+                // 完全打乱所有78张牌
+                const allCards = tarotDatabase.getAllCards();
+                this.state.shuffledCards = this.shuffleArray([...allCards]);
+                this.state.selectedCards = [];
+                
+                // 初始化按钮状态为禁用
+                const btn = document.getElementById('btn-confirm-selection');
+                if (btn) {
+                    btn.disabled = true;
                 }
-                this.updateDrawInstruction();
+                
+                // 渲染 U 型卡牌
+                this.renderUCards();
             },
             updateDrawInstruction() {
                 const config = this.spreadConfig[this.state.spreadType];
@@ -1793,6 +1973,121 @@
                     btn.disabled = true;
                     setTimeout(() => this.showResult(), 500);
                 }
+            },
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            },
+            renderUCards() {
+                const container = document.getElementById('u-cards-container');
+                container.innerHTML = '';
+                
+                const cards = this.state.shuffledCards;
+                const cardCount = cards.length;
+                const cardsPerRow = 26;
+                const totalRows = 3;
+                
+                // 创建三行
+                for (let row = 0; row < totalRows; row++) {
+                    const rowEl = document.createElement('div');
+                    rowEl.className = 'card-row';
+                    
+                    // 计算当前行的卡牌索引范围
+                    const startIndex = row * cardsPerRow;
+                    const endIndex = Math.min(startIndex + cardsPerRow, cardCount);
+                    
+                    // 添加当前行的卡牌
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const card = cards[i];
+                        const cardEl = document.createElement('div');
+                        cardEl.className = 'u-card';
+                        cardEl.dataset.index = i;
+                        cardEl.dataset.cardId = card.id;
+                        
+                        cardEl.innerHTML = `
+                            <div class="u-card-back"></div>
+                        `;
+                        
+                        cardEl.addEventListener('click', () => this.toggleCardSelection(i));
+                        rowEl.appendChild(cardEl);
+                    }
+                    
+                    container.appendChild(rowEl);
+                }
+                
+                // 在卡牌渲染完成后更新选择信息
+                this.updateSelectionInfo();
+            },
+            toggleCardSelection(index) {
+                const cardIndex = this.state.selectedCards.indexOf(index);
+                const config = this.spreadConfig[this.state.spreadType];
+                const maxCards = config.cardCount;
+                
+                if (cardIndex > -1) {
+                    // 取消选择
+                    this.state.selectedCards.splice(cardIndex, 1);
+                } else if (this.state.selectedCards.length < maxCards) {
+                    // 选择
+                    this.state.selectedCards.push(index);
+                }
+                
+                // 更新 UI
+                const allCards = document.querySelectorAll('.u-card');
+                allCards.forEach((el, i) => {
+                    if (this.state.selectedCards.includes(i)) {
+                        el.classList.add('selected');
+                    } else {
+                        el.classList.remove('selected');
+                    }
+                });
+                
+                this.updateSelectionInfo();
+            },
+            updateSelectionInfo() {
+                const config = this.spreadConfig[this.state.spreadType];
+                const countEl = document.getElementById('selection-count');
+                const btn = document.getElementById('btn-confirm-selection');
+                
+                if (countEl && config) {
+                    countEl.textContent = `已选 ${this.state.selectedCards.length} / 需要 ${config.cardCount} 张`;
+                }
+                
+                if (btn && config) {
+                    const shouldDisable = this.state.selectedCards.length !== config.cardCount;
+                    btn.disabled = shouldDisable;
+                }
+            },
+            goBackToShuffle() {
+                // 重新洗牌并选牌
+                this.state.selectedCards = [];
+                this.state.shuffledCards = this.shuffleArray([...tarotDatabase.getAllCards()]);
+                this.renderUCards();
+                this.updateSelectionInfo();
+            },
+            confirmSelection() {
+                const config = this.spreadConfig[this.state.spreadType];
+                
+                // 获取选中的卡牌
+                const selectedCards = this.state.selectedCards.map((cardIndex, index) => {
+                    const card = this.state.shuffledCards[cardIndex];
+                    const isReversed = Math.random() < 0.3;
+                    return {
+                        ...card,
+                        isReversed,
+                        position: config.positions[index],
+                        positionIndex: index
+                    };
+                });
+                
+                this.state.drawnCards = selectedCards;
+                
+                // 隐藏选牌区域，显示结果
+                document.getElementById('step-u-selection').classList.remove('active');
+                this.showResult();
             },
             drawCard() {
                 const btn = document.getElementById('btn-draw');
