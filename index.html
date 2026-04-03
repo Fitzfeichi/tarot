@@ -1362,13 +1362,17 @@
         }
 
         .btn-confirm {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
             background: linear-gradient(135deg, var(--gold) 0%, #E8D5A3 100%);
             color: var(--rose-dark);
-            padding: var(--space-sm) var(--space-xl);
-            font-family: var(--font-display);
-            font-weight: 700;
+            padding: var(--space-sm) var(--space-lg);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
             border: none;
-            border-radius: 30px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s var(--ease-elastic);
         }
