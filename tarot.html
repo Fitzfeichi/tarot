@@ -221,6 +221,12 @@
             margin-bottom: var(--space-xl);
         }
 
+        #reading-subtitle-center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .hero {
             text-align: center;
             padding: var(--space-xxl) var(--space-md);
@@ -488,32 +494,14 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 100%);
+            background-image: url('images/cards/back/back.webp');
+            background-size: cover;
+            background-position: center;
             border: 3px solid var(--gold);
             border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: var(--gold);
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             transform-style: preserve-3d;
             backface-visibility: hidden;
-        }
-
-        .deck-card::before {
-            content: '';
-            position: absolute;
-            inset: 10px;
-            border: 2px solid var(--gold);
-            border-radius: 10px;
-            opacity: 0.5;
-        }
-
-        .deck-card::after {
-            content: '✦';
-            font-size: 4rem;
-            opacity: 0.8;
         }
 
         @keyframes shuffle1 {
@@ -664,27 +652,10 @@
         }
 
         .tarot-card .card-back {
-            background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 100%);
+            background-image: url('images/cards/back/back.webp');
+            background-size: cover;
+            background-position: center;
             border: 3px solid var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tarot-card .card-back::before {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border: 2px solid var(--gold);
-            border-radius: 10px;
-            opacity: 0.5;
-        }
-
-        .tarot-card .card-back::after {
-            content: '✦';
-            font-size: 3rem;
-            color: var(--gold);
-            opacity: 0.8;
         }
 
         .tarot-card .card-face {
@@ -1011,27 +982,16 @@
         }
 
         .card-back {
-            background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 100%);
-            border: 3px solid var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-back::before {
-            content: '✦';
-            font-size: 3rem;
-            color: var(--gold);
-            opacity: 0.8;
-        }
-
-        .card-back::after {
-            content: '';
             position: absolute;
-            inset: 8px;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            opacity: 0.5;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            backface-visibility: hidden;
+            overflow: hidden;
+            background-image: url('images/cards/back/back.webp');
+            background-size: cover;
+            background-position: center;
+            border: 3px solid var(--gold);
         }
 
         .card-front {
@@ -1296,45 +1256,68 @@
             display: block;
         }
 
+        /* 每日指引选牌区域样式 */
+        .daily-selection-area {
+            display: none;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .daily-selection-area.active {
+            display: block;
+        }
+
         .u-cards-container {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: var(--space-md);
-            padding: var(--space-md);
+            gap: 8px; /* 紧凑行间距 */
+            padding: 10px; /* 紧凑容器padding */
+            overflow-x: auto;
+            overflow-y: visible;
+            white-space: nowrap;
         }
 
         .card-row {
             display: flex;
             justify-content: center;
-            gap: var(--card-gap);
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding: var(--space-sm) 0;
+            align-items: flex-end;
+            position: relative;
+            height: calc(var(--card-height) + 25px); /* 紧凑高度 */
+            padding: 15px 0; /* 减小padding */
         }
 
         .u-card {
-            flex-shrink: 0;
+            position: absolute;
             width: var(--card-width);
             height: var(--card-height);
-            border-radius: 12px;
+            border-radius: 10px; /* 稍微减小圆角，更整洁 */
             cursor: pointer;
             transform-style: preserve-3d;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backface-visibility: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.2),
+                0 4px 8px rgba(0, 0, 0, 0.1); /* 层次感阴影 */
+            transform-origin: bottom center;
         }
 
         .u-card:hover {
-            transform: translateY(-20px) scale(1.05) !important;
-            box-shadow: 0 15px 40px var(--gold-glow);
-            z-index: 1000 !important;
+            transform: translateY(-30px) scale(1.08);
+            box-shadow: 
+                0 15px 40px var(--gold-glow),
+                0 0 25px var(--gold-glow);
+            z-index: 1002 !important;
         }
 
         .u-card.selected {
-            transform: translateY(-35px) scale(1.1) !important;
-            box-shadow: 0 20px 50px var(--gold-glow), 0 0 25px var(--gold-glow);
-            z-index: 1001 !important;
+            transform: translateY(-40px) scale(1.1);
+            box-shadow: 
+                0 20px 50px var(--gold-glow),
+                0 0 30px var(--gold-glow);
+            z-index: 1003 !important;
         }
 
         .u-card-face,
@@ -1348,27 +1331,10 @@
         }
 
         .u-card-back {
-            background: linear-gradient(135deg, var(--rose-dark) 0%, var(--rose) 100%);
+            background-image: url('images/cards/back/back.webp');
+            background-size: cover;
+            background-position: center;
             border: 3px solid var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .u-card-back::before {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            opacity: 0.5;
-        }
-
-        .u-card-back::after {
-            content: '✦';
-            font-size: 3rem;
-            color: var(--gold);
-            opacity: 0.8;
         }
 
         .selection-info {
@@ -1425,7 +1391,7 @@
             }
             
             .card-row {
-                gap: 8px;
+                height: calc(116px + 20px); /* 紧凑高度 */
             }
         }
 
@@ -1434,9 +1400,183 @@
                 width: 55px;
                 height: 91px;
             }
-            
+
             .card-row {
-                gap: 6px;
+                height: calc(91px + 15px); /* 紧凑高度 */
+            }
+        }
+
+        /* 模态弹窗样式 */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s var(--ease-silk), visibility 0.3s;
+        }
+
+        .modal-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 42, 42, 0.7);
+        }
+
+        @supports (backdrop-filter: blur(5px)) {
+            .modal-overlay {
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+            }
+        }
+
+        .modal-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 420px;
+            width: 90%;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s var(--ease-elastic);
+        }
+
+        .modal-container.active .modal-wrapper {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--cream) 0%, var(--paper) 100%);
+            border: 3px solid var(--gold);
+            border-radius: 20px 0 20px 0;
+            padding: var(--space-xl);
+            text-align: center;
+            box-shadow:
+                0 20px 60px rgba(139, 74, 107, 0.4),
+                0 0 30px var(--gold-glow);
+            position: relative;
+        }
+
+        .modal-content::before,
+        .modal-content::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border: 2px solid var(--rose);
+        }
+
+        .modal-content::before {
+            top: -8px;
+            left: -8px;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 15px 0 0 0;
+        }
+
+        .modal-content::after {
+            bottom: -8px;
+            right: -8px;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 15px 0;
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            color: var(--gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-icon .material-icons {
+            font-size: 4rem;
+        }
+
+        .modal-icon.info { color: var(--gold); }
+        .modal-icon.success { color: #4CAF50; }
+        .modal-icon.warning { color: var(--rose); }
+        .modal-icon.error { color: #e74c3c; }
+
+        @keyframes modalIconPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .modal-container.active .modal-icon {
+            animation: modalIconPop 0.4s var(--ease-elastic) forwards;
+        }
+
+        .modal-message {
+            font-size: 1.15rem;
+            color: var(--charcoal);
+            line-height: 1.7;
+            margin-bottom: var(--space-lg);
+            font-family: var(--font-body);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions .btn {
+            min-width: 120px;
+        }
+
+        .modal-actions .btn-primary {
+            background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+        }
+
+        .modal-actions .btn-secondary {
+            background: transparent;
+            color: var(--rose-dark);
+            border: 2px solid var(--gold);
+        }
+
+        .modal-actions .btn-secondary:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: var(--space-lg);
+            }
+
+            .modal-icon {
+                font-size: 3rem;
+            }
+
+            .modal-icon .material-icons {
+                font-size: 3rem;
+            }
+
+            .modal-message {
+                font-size: 1rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
             }
         }
     </style>
@@ -1476,16 +1616,6 @@
             </div>
 
             <div class="feature-cards">
-                <div class="feature-card" onclick="app.startReading()">
-                    <span class="material-icons icon">style</span>
-                    <h3>三种牌阵</h3>
-                    <p>单张牌、三张时间阵、凯尔特十字，满足不同问题的深度需求</p>
-                </div>
-                <div class="feature-card" onclick="app.startDailyDraw()">
-                    <span class="material-icons icon">calendar_today</span>
-                    <h3>每日指引</h3>
-                    <p>每天抽取一张牌，获取宇宙给你的专属讯息</p>
-                </div>
                 <div class="feature-card" onclick="app.showCardMeanings()">
                     <span class="material-icons icon">menu_book</span>
                     <h3>牌义解读</h3>
@@ -1496,8 +1626,7 @@
 
         <section class="section reading-section" id="reading-section">
             <h2 class="section-title">塔罗占卜</h2>
-            <p class="section-subtitle">专注于你心中的问题，让塔罗牌为你揭示答案</p>
-
+            <p class="section-subtitle" id="reading-subtitle-center">专注于你心中的问题，让塔罗牌为你揭示答案</p>
             <div class="reading-step" id="step-question">
                 <div class="question-input-area">
                     <label for="question-input">你心中想问什么？</label>
@@ -1588,8 +1717,26 @@
             <h2 class="section-title">每日一抽</h2>
             <p class="section-subtitle">以每日的塔罗智慧开始你的一天</p>
 
+            <div class="daily-selection-area" id="daily-selection-area">
+                <div class="selection-info">
+                    <div class="selection-count" id="daily-selection-count">已选 0 / 需要 1 张</div>
+                    <div class="selection-hint">点击卡牌进行选择，感受你的直觉指引</div>
+                </div>
+                <div class="u-cards-container" id="daily-cards-container"></div>
+                <div class="selection-actions">
+                    <button class="btn btn-secondary" onclick="app.goBackToDailyHome()">
+                        <span class="material-icons">refresh</span>
+                        返回
+                    </button>
+                    <button class="btn-confirm" id="btn-confirm-daily-selection" onclick="app.confirmDailySelection()">
+                        <span class="material-icons">check_circle</span>
+                        确认抽牌
+                    </button>
+                </div>
+            </div>
+
             <div id="daily-draw-content">
-                <button class="btn btn-primary" id="btn-daily-draw" onclick="app.performDailyDraw()">
+                <button class="btn btn-primary" id="btn-daily-draw" onclick="app.startDailyCardSelection()">
                     <span class="material-icons">wb_sunny</span>
                     抽取今日指引
                 </button>
@@ -1641,6 +1788,18 @@
             <p class="footer-copyright">© 2024 塔罗占卜。保留所有权利。</p>
         </div>
     </footer>
+
+    <!-- 模态弹窗容器 -->
+    <div id="modal-container" class="modal-container">
+        <div class="modal-overlay" onclick="Modal.close()"></div>
+        <div class="modal-wrapper">
+            <div class="modal-content">
+                <div class="modal-icon" id="modal-icon"></div>
+                <div class="modal-message" id="modal-message"></div>
+                <div class="modal-actions" id="modal-actions"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const tarotDatabase = {
@@ -1802,6 +1961,18 @@
                 three: { name: '三张时间阵', cardCount: 3, positions: ['过去', '现在', '未来'] },
                 celtic: { name: '凯尔特十字', cardCount: 6, positions: ['现状', '阻碍', '基础', '过去', '未来', '建议'] }
             },
+            getResponsiveConfig() {
+                const isMobile = window.matchMedia('(max-width: 480px)').matches;
+                const isTablet = window.matchMedia('(max-width: 768px)').matches;
+                
+                if (isMobile) {
+                    return { cardWidth: 55, cardHeight: 91, overlapOffset: 40, particleCount: 25 };
+                } else if (isTablet) {
+                    return { cardWidth: 70, cardHeight: 116, overlapOffset: 50, particleCount: 25 };
+                } else {
+                    return { cardWidth: 100, cardHeight: 166, overlapOffset: 70, particleCount: 50 };
+                }
+            },
             init() {
                 this.loadDailyStatus();
                 this.initParticles();
@@ -1824,8 +1995,8 @@
 
                 const createParticles = () => {
                     particles = [];
-                    const count = window.innerWidth < 768 ? 25 : 50;
-                    for (let i = 0; i < count; i++) {
+                    const { particleCount } = this.getResponsiveConfig();
+                    for (let i = 0; i < particleCount; i++) {
                         particles.push({
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
@@ -1929,11 +2100,11 @@
             startShuffle() {
                 const question = document.getElementById('question-input').value.trim();
                 if (!question) {
-                    alert('请先输入你的问题');
+                    Modal.alert('请先输入你的问题');
                     return;
                 }
                 if (!this.state.spreadType) {
-                    alert('请选择一种牌阵');
+                    Modal.alert('请选择一种牌阵');
                     return;
                 }
                 this.state.question = question;
@@ -1991,6 +2162,10 @@
                 const cardsPerRow = 26;
                 const totalRows = 3;
                 
+                // 动态检测屏幕尺寸并调整卡牌参数
+                const { cardWidth, cardHeight, overlapOffset } = this.getResponsiveConfig();
+                const screenWidth = window.innerWidth;
+                
                 // 创建三行
                 for (let row = 0; row < totalRows; row++) {
                     const rowEl = document.createElement('div');
@@ -1999,6 +2174,19 @@
                     // 计算当前行的卡牌索引范围
                     const startIndex = row * cardsPerRow;
                     const endIndex = Math.min(startIndex + cardsPerRow, cardCount);
+                    const cardsInThisRow = endIndex - startIndex;
+                    
+                    // 计算行总宽度和起始位置
+                    const totalStackWidth = (cardsInThisRow - 1) * overlapOffset + cardWidth;
+                    let startX = 0;
+                    
+                    // 居中显示
+                    const containerWidth = container.offsetWidth || screenWidth;
+                    if (totalStackWidth < containerWidth) {
+                        startX = (containerWidth - totalStackWidth) / 2;
+                    } else {
+                        startX = 50; // 左边距
+                    }
                     
                     // 添加当前行的卡牌
                     for (let i = startIndex; i < endIndex; i++) {
@@ -2008,6 +2196,16 @@
                         cardEl.dataset.index = i;
                         cardEl.dataset.cardId = card.id;
                         
+                        // 计算堆叠位置 - 垂直整齐排列，无倾斜
+                        const cardPositionInRow = i - startIndex;
+                        const leftPos = startX + (cardPositionInRow * overlapOffset);
+                        
+                        // 设置卡牌位置 - 统一底部对齐，无偏移无旋转
+                        cardEl.style.left = `${leftPos}px`;
+                        cardEl.style.bottom = '15px'; // 统一底部位置，匹配padding
+                        cardEl.style.transform = 'rotate(0deg)'; // 无倾斜角度
+                        cardEl.style.zIndex = cardPositionInRow;
+                        
                         cardEl.innerHTML = `
                             <div class="u-card-back"></div>
                         `;
@@ -2015,6 +2213,10 @@
                         cardEl.addEventListener('click', () => this.toggleCardSelection(i));
                         rowEl.appendChild(cardEl);
                     }
+                    
+                    // 调整容器宽度以容纳所有卡牌
+                    const requiredWidth = startX + (cardsInThisRow - 1) * overlapOffset + cardWidth + 100;
+                    rowEl.style.width = `${requiredWidth}px`;
                     
                     container.appendChild(rowEl);
                 }
@@ -2167,6 +2369,171 @@
                 this.updateDailyDrawUI();
                 window.scrollTo(0, 0);
             },
+            startDailyCardSelection() {
+                const today = new Date().toDateString();
+                const saved = localStorage.getItem('tarotDaily');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.date === today) {
+                        Modal.alert('你今天已经抽过牌了，请明天再来！');
+                        return;
+                    }
+                }
+                document.getElementById('daily-draw-content').style.display = 'none';
+                document.getElementById('daily-selection-area').classList.add('active');
+                this.state.selectedCards = [];
+                this.state.shuffledCards = this.shuffleArray([...tarotDatabase.getAllCards()]);
+                this.renderDailyCards();
+                this.updateDailySelectionInfo();
+                window.scrollTo(0, 0);
+            },
+            goBackToDailyHome() {
+                document.getElementById('daily-selection-area').classList.remove('active');
+                document.getElementById('daily-draw-content').style.display = 'block';
+                window.scrollTo(0, 0);
+            },
+            renderDailyCards() {
+                const container = document.getElementById('daily-cards-container');
+                container.innerHTML = '';
+                
+                const cards = this.state.shuffledCards;
+                const cardCount = cards.length;
+                const cardsPerRow = 26;
+                const totalRows = 3;
+                
+                const { cardWidth, cardHeight, overlapOffset } = this.getResponsiveConfig();
+                const screenWidth = window.innerWidth;
+                
+                for (let row = 0; row < totalRows; row++) {
+                    const rowEl = document.createElement('div');
+                    rowEl.className = 'card-row';
+                    
+                    const startIndex = row * cardsPerRow;
+                    const endIndex = Math.min(startIndex + cardsPerRow, cardCount);
+                    const cardsInThisRow = endIndex - startIndex;
+                    
+                    const totalStackWidth = (cardsInThisRow - 1) * overlapOffset + cardWidth;
+                    let startX = 0;
+                    
+                    const containerWidth = container.offsetWidth || screenWidth;
+                    if (totalStackWidth < containerWidth) {
+                        startX = (containerWidth - totalStackWidth) / 2;
+                    } else {
+                        startX = 50;
+                    }
+                    
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const card = cards[i];
+                        const cardEl = document.createElement('div');
+                        cardEl.className = 'u-card';
+                        cardEl.dataset.index = i;
+                        cardEl.dataset.cardId = card.id;
+                        
+                        const cardPositionInRow = i - startIndex;
+                        const leftPos = startX + (cardPositionInRow * overlapOffset);
+                        
+                        cardEl.style.left = `${leftPos}px`;
+                        cardEl.style.bottom = '15px';
+                        cardEl.style.transform = 'rotate(0deg)';
+                        cardEl.style.zIndex = cardPositionInRow;
+                        
+                        cardEl.innerHTML = `<div class="u-card-back"></div>`;
+                        
+                        cardEl.addEventListener('click', () => this.toggleDailyCardSelection(i));
+                        rowEl.appendChild(cardEl);
+                    }
+                    
+                    const requiredWidth = startX + (cardsInThisRow - 1) * overlapOffset + cardWidth + 100;
+                    rowEl.style.width = `${requiredWidth}px`;
+                    
+                    container.appendChild(rowEl);
+                }
+            },
+            toggleDailyCardSelection(index) {
+                const cardIndex = this.state.selectedCards.indexOf(index);
+                const maxCards = 1;
+                
+                if (cardIndex > -1) {
+                    this.state.selectedCards.splice(cardIndex, 1);
+                    const cardEl = document.querySelector(`#daily-cards-container .u-card[data-index="${index}"]`);
+                    if (cardEl) cardEl.classList.remove('selected');
+                } else {
+                    if (this.state.selectedCards.length < maxCards) {
+                        if (this.state.selectedCards.length > 0) {
+                            const prevIndex = this.state.selectedCards[0];
+                            const prevCardEl = document.querySelector(`#daily-cards-container .u-card[data-index="${prevIndex}"]`);
+                            if (prevCardEl) prevCardEl.classList.remove('selected');
+                        }
+                        this.state.selectedCards.push(index);
+                        const cardEl = document.querySelector(`#daily-cards-container .u-card[data-index="${index}"]`);
+                        if (cardEl) cardEl.classList.add('selected');
+                    }
+                }
+                this.updateDailySelectionInfo();
+            },
+            updateDailySelectionInfo() {
+                const countEl = document.getElementById('daily-selection-count');
+                const confirmBtn = document.getElementById('btn-confirm-daily-selection');
+                const selected = this.state.selectedCards.length;
+                countEl.textContent = `已选 ${selected} / 需要 1 张`;
+                confirmBtn.disabled = selected === 0;
+            },
+            confirmDailySelection() {
+                if (this.state.selectedCards.length === 0) {
+                    Modal.alert('请先选择一张卡牌');
+                    return;
+                }
+                
+                const today = new Date().toDateString();
+                const cardIndex = this.state.selectedCards[0];
+                const card = this.state.shuffledCards[cardIndex];
+                const isReversed = Math.random() < 0.3;
+                
+                this.state.dailyCard = { 
+                    ...card, 
+                    isReversed, 
+                    date: today,
+                    position: '今日指引'
+                };
+                this.state.dailyDrawn = true;
+                
+                localStorage.setItem('tarotDaily', JSON.stringify({
+                    date: today,
+                    card: this.state.dailyCard
+                }));
+                
+                this.addToHistory(this.state.dailyCard);
+                
+                document.getElementById('daily-selection-area').classList.remove('active');
+                this.showDailyResult();
+            },
+            showDailyResult() {
+                document.getElementById('daily-card-display').innerHTML = this.createCardHTML(this.state.dailyCard);
+                document.getElementById('daily-card-display').classList.remove('hidden');
+                
+                const card = this.state.dailyCard;
+                const meaning = card.isReversed ? card.reversed : card.upright;
+                const keywords = card.isReversed ? card.keywords.reversed : card.keywords.upright;
+                const orientation = card.isReversed ? '逆位' : '正位';
+                
+                document.getElementById('daily-reading').innerHTML = `
+                    <h4 style="font-family: var(--font-display); color: var(--rose-dark); margin-bottom: 1rem;">
+                        今日指引：${card.name} ${orientation}
+                    </h4>
+                    <p><strong>关键词：</strong>${keywords.join('、')}</p>
+                    <p style="margin-top: 1rem;">${meaning}</p>
+                `;
+                document.getElementById('daily-reading').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    const cardElement = document.querySelector('#daily-card-display .tarot-card');
+                    if (cardElement) {
+                        cardElement.classList.add('flipped');
+                    }
+                }, 100);
+                
+                window.scrollTo(0, 0);
+            },
             loadDailyStatus() {
                 const today = new Date().toDateString();
                 const saved = localStorage.getItem('tarotDaily');
@@ -2184,7 +2551,7 @@
                 if (saved) {
                     const data = JSON.parse(saved);
                     if (data.date === today) {
-                        alert('你今天已经抽过牌了，请明天再来！');
+                        Modal.alert('你今天已经抽过牌了，请明天再来！');
                         return;
                     }
                 }
@@ -2223,7 +2590,7 @@
                     reading.classList.remove('hidden');
                 } else {
                     content.innerHTML = `
-                        <button class="btn btn-primary" onclick="app.performDailyDraw()">
+                        <button class="btn btn-primary" onclick="app.startDailyCardSelection()">
                             <span class="material-icons">wb_sunny</span>
                             抽取今日指引
                         </button>
@@ -2361,9 +2728,166 @@
             }
         };
 
+        class Modal {
+            static _timeout = null;
+            static _keyHandler = null;
+            static _onClose = null;
+
+            static show(message, options = {}) {
+                const {
+                    icon = 'info',
+                    duration = 0,
+                    buttonText = '确定',
+                    onClose = null
+                } = options;
+
+                const container = document.getElementById('modal-container');
+                const iconEl = document.getElementById('modal-icon');
+                const messageEl = document.getElementById('modal-message');
+                const actionsEl = document.getElementById('modal-actions');
+
+                const icons = {
+                    info: 'info',
+                    success: 'check_circle',
+                    warning: 'warning',
+                    error: 'error'
+                };
+
+                iconEl.innerHTML = `<span class="material-icons">${icons[icon]}</span>`;
+                iconEl.className = `modal-icon ${icon}`;
+                messageEl.textContent = message;
+
+                actionsEl.innerHTML = `
+                    <button class="btn btn-primary" id="modal-ok-btn">${buttonText}</button>
+                `;
+
+                document.getElementById('modal-ok-btn').onclick = () => this.close();
+
+                container.classList.add('active');
+                this._onClose = onClose;
+
+                if (duration > 0) {
+                    this._timeout = setTimeout(() => this.close(), duration);
+                }
+
+                this._keyHandler = (e) => {
+                    if (e.key === 'Escape' || e.key === 'Enter') {
+                        this.close();
+                    }
+                };
+                document.addEventListener('keydown', this._keyHandler);
+            }
+
+            static close() {
+                const container = document.getElementById('modal-container');
+                container.classList.remove('active');
+
+                if (this._timeout) {
+                    clearTimeout(this._timeout);
+                    this._timeout = null;
+                }
+                if (this._keyHandler) {
+                    document.removeEventListener('keydown', this._keyHandler);
+                    this._keyHandler = null;
+                }
+                if (this._onClose) {
+                    const callback = this._onClose;
+                    this._onClose = null;
+                    callback();
+                }
+            }
+
+            static alert(message, options = {}) {
+                return this.show(message, { ...options, icon: 'warning' });
+            }
+
+            static success(message, options = {}) {
+                return this.show(message, { ...options, icon: 'success' });
+            }
+
+            static error(message, options = {}) {
+                return this.show(message, { ...options, icon: 'error' });
+            }
+
+            static info(message, options = {}) {
+                return this.show(message, { ...options, icon: 'info' });
+            }
+        }
+
+        class ConfirmDialog {
+            static _onConfirm = null;
+            static _onCancel = null;
+            static _keyHandler = null;
+
+            static show(message, options = {}) {
+                const {
+                    title = '确认',
+                    confirmText = '确认',
+                    cancelText = '取消',
+                    onConfirm = null,
+                    onCancel = null
+                } = options;
+
+                const container = document.getElementById('modal-container');
+                const iconEl = document.getElementById('modal-icon');
+                const messageEl = document.getElementById('modal-message');
+                const actionsEl = document.getElementById('modal-actions');
+
+                iconEl.innerHTML = `<span class="material-icons">help_outline</span>`;
+                iconEl.className = 'modal-icon warning';
+                messageEl.textContent = message;
+
+                actionsEl.innerHTML = `
+                    <button class="btn btn-secondary" id="confirm-cancel-btn">${cancelText}</button>
+                    <button class="btn btn-primary" id="confirm-confirm-btn">${confirmText}</button>
+                `;
+
+                document.getElementById('confirm-cancel-btn').onclick = () => this.cancel();
+                document.getElementById('confirm-confirm-btn').onclick = () => this.confirm();
+
+                container.classList.add('active');
+                this._onConfirm = onConfirm;
+                this._onCancel = onCancel;
+
+                this._keyHandler = (e) => {
+                    if (e.key === 'Escape') this.cancel();
+                    if (e.key === 'Enter') this.confirm();
+                };
+                document.addEventListener('keydown', this._keyHandler);
+            }
+
+            static confirm() {
+                const container = document.getElementById('modal-container');
+                container.classList.remove('active');
+                if (this._keyHandler) {
+                    document.removeEventListener('keydown', this._keyHandler);
+                    this._keyHandler = null;
+                }
+                if (this._onConfirm) {
+                    const callback = this._onConfirm;
+                    this._onConfirm = null;
+                    callback();
+                }
+            }
+
+            static cancel() {
+                const container = document.getElementById('modal-container');
+                container.classList.remove('active');
+                if (this._keyHandler) {
+                    document.removeEventListener('keydown', this._keyHandler);
+                    this._keyHandler = null;
+                }
+                if (this._onCancel) {
+                    const callback = this._onCancel;
+                    this._onCancel = null;
+                    callback();
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
     </script>
 </body>
-</html>
+</html><p class="section-subtitle">专注于你心中的问题，让塔罗牌为你揭示答案</p><p class="section-subtitle">专注于你心中的问题，让塔罗牌为你揭示答案</p>
