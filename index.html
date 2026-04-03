@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline';">
     <title>塔罗占卜 - 揭开神秘智慧</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Fraunces:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -971,29 +972,6 @@
             will-change: transform, box-shadow;
         }
 
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            backface-visibility: hidden;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            backface-visibility: hidden;
-            overflow: hidden;
-            background-image: url('images/cards/back/back.webp');
-            background-size: cover;
-            background-position: center;
-            border: 3px solid var(--gold);
-        }
-
         .card-front {
             background: white;
             border: 3px solid var(--gold);
@@ -1806,6 +1784,150 @@
     </div>
 
     <script>
+        // ========================================
+        // 安全工具函数
+        // ========================================
+        
+        /**
+         * HTML转义函数 - 防止XSS攻击
+         * @param {string} text - 需要转义的文本
+         * @returns {string} 转义后的安全文本
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        /**
+         * 输入验证工具
+         */
+        const InputValidator = {
+            // 最大问题长度
+            MAX_QUESTION_LENGTH: 500,
+            
+            // 允许的字符模式（中英文、数字、常用标点、空格）
+            SAFE_PATTERN: /^[\u4e00-\u9fa5a-zA-Z0-9\s,.!?。，、！？、；：""''（）【】《》～…-]+$/,
+            
+            /**
+             * 验证问题输入
+             * @param {string} question - 用户输入的问题
+             * @returns {Object} 验证结果 { valid: boolean, message: string }
+             */
+            validateQuestion(question) {
+                const trimmed = question ? question.trim() : '';
+                
+                if (!trimmed) {
+                    return { valid: false, message: '请先输入你的问题' };
+                }
+                
+                if (trimmed.length > this.MAX_QUESTION_LENGTH) {
+                    return { 
+                        valid: false, 
+                        message: `问题内容过长，请控制在${this.MAX_QUESTION_LENGTH}字以内（当前${trimmed.length}字）` 
+                    };
+                }
+                
+                if (!this.SAFE_PATTERN.test(trimmed)) {
+                    return { 
+                        valid: false, 
+                        message: '请只使用中英文、数字和常用标点符号' 
+                    };
+                }
+                
+                return { valid: true, message: '' };
+            },
+            
+            /**
+             * 清理并转义用户输入
+             * @param {string} input - 用户输入
+             * @returns {string} 清理转义后的文本
+             */
+            sanitize(input) {
+                if (!input) return '';
+                return escapeHtml(input.trim());
+            }
+        };
+        
+        /**
+         * 图片加载工具 - 使用JavaScript动态处理，避免CSP阻止内联事件处理器
+         */
+        const ImageUtils = {
+            // 降级图片的SVG base64编码（简洁的塔罗牌背面图案）
+            fallbackImage: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTY2Ij48cmVjdCBmaWxsPSIjQzlBOTYxIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjE2NiIvPjxyZWN0IGZpbGw9IiNGNEQ0QzEiIHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjE0NiIgc3Ryb2tlPSIjRjhEMUE2IiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGZpbGw9IiNGOEQxQTYiIGN4PSI1MCIgY3k9IjgzIiByPSIyMCIvPjx0ZXh0IGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0M5QTk2MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iNTAiIHk9Ijg4Ij5UPC90ZXh0Pjwvc3ZnPg==",
+            
+            /**
+             * 处理图片加载错误 - 全局错误处理器
+             */
+            handleImageError() {
+                this.onerror = null;
+                this.src = ImageUtils.fallbackImage;
+            },
+            
+            /**
+             * 为单个图片元素添加错误处理
+             * @param {HTMLImageElement} img - 图片元素
+             */
+            attachErrorHandler(img) {
+                img.onerror = ImageUtils.handleImageError;
+                img.loading = 'lazy';
+            },
+            
+            /**
+             * 为容器内所有图片添加错误处理
+             * @param {HTMLElement} container - 容器元素
+             */
+            attachErrorHandlerToContainer(container) {
+                const images = container.querySelectorAll('img');
+                images.forEach(img => {
+                    ImageUtils.attachErrorHandler(img);
+                });
+            },
+            
+            /**
+             * 创建带错误处理的图片标签（不含onerror属性，由JavaScript处理）
+             * @param {string} src - 图片源
+             * @param {string} alt - 图片alt文本
+             * @param {string} className - CSS类名
+             * @returns {string} 图片HTML
+             */
+            createImage(src, alt, className = '') {
+                return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" class="${escapeHtml(className)}" />`;
+            }
+        };
+        
+        /**
+         * 页面加载完成后自动为所有图片添加错误处理
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用MutationObserver监听DOM变化，为新添加的图片添加错误处理
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element节点
+                            if (node.tagName === 'IMG') {
+                                ImageUtils.attachErrorHandler(node);
+                            }
+                            const images = node.querySelectorAll ? node.querySelectorAll('img') : [];
+                            images.forEach(function(img) {
+                                ImageUtils.attachErrorHandler(img);
+                            });
+                        }
+                    });
+                });
+            });
+            
+            // 观察整个document
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            // 立即为现有图片添加错误处理
+            ImageUtils.attachErrorHandlerToContainer(document.body);
+        });
+        
         const tarotDatabase = {
             majorArcana: [
                 { id: 0, name: "愚人", nameEn: "The Fool", number: "0", symbol: "🃏", keywords: { upright: ["新开始", "冒险", "纯真", "自由"], reversed: ["鲁莽", "冒险", "轻信", "停滞"] }, upright: "愚人代表着新的开始、无限的潜力和纯真的信任。这是一个踏上未知旅程的时刻，保持开放的心态，相信宇宙会指引你的方向。", reversed: "逆位的愚人提醒你谨慎行事，避免鲁莽的决定。在追求新目标之前，请先深思熟虑，不要被表面的诱惑所迷惑。" },
@@ -1895,14 +2017,18 @@
                 { id: 76, name: "星币皇后", nameEn: "Queen of Pentacles", number: "Q", symbol: "Q💰", suit: "pentacles", element: "土", keywords: { upright: ["滋养", "实用", "丰盛", "财务安全"], reversed: ["过度保护", "财务不安全", "忽视自我", "工作狂"] }, upright: "星币皇后代表实用和滋养。照顾他人同时保持财务智慧。", reversed: "逆位暗示工作狂或忽视自我。在照顾他人之前先照顾自己。" },
                 { id: 77, name: "星币国王", nameEn: "King of Pentacles", number: "K", symbol: "K💰", suit: "pentacles", element: "土", keywords: { upright: ["成功", "领导力", "财务智慧", "稳定"], reversed: ["贪婪", "物质主义", "腐败", "不稳定"] }, upright: "星币国王象征财务成功和稳定。用智慧和慷慨管理你的资源。", reversed: "逆位暗示贪婪或物质主义。记住，真正的财富超越了金钱。" }
             ],
+            _cachedAllCards: null,
             getAllCards() {
-                return [
-                    ...this.majorArcana,
-                    ...this.wands,
-                    ...this.cups,
-                    ...this.swords,
-                    ...this.pentacles
-                ];
+                if (!this._cachedAllCards) {
+                    this._cachedAllCards = [
+                        ...this.majorArcana,
+                        ...this.wands,
+                        ...this.cups,
+                        ...this.swords,
+                        ...this.pentacles
+                    ];
+                }
+                return this._cachedAllCards;
             },
             getCardImageSrc(card) {
                 const suitFolders = {
@@ -1947,6 +2073,27 @@
             }
         };
 
+        const Storage = {
+            set(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (e) {
+                    console.warn(`Storage setItem failed for "${key}":`, e);
+                    return false;
+                }
+            },
+            get(key, fallback = null) {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : fallback;
+                } catch (e) {
+                    console.warn(`Storage getItem failed for "${key}":`, e);
+                    return fallback;
+                }
+            }
+        };
+
         const app = {
             state: {
                 currentView: 'home',
@@ -1959,6 +2106,13 @@
                 dailyCard: null,
                 shuffledCards: [],
                 selectedCards: []
+            },
+            _dom: {},
+            $(id) {
+                if (!this._dom[id]) {
+                    this._dom[id] = document.getElementById(id);
+                }
+                return this._dom[id];
             },
             spreadConfig: {
                 single: { name: '单张牌', cardCount: 1, positions: ['当前状况'] },
@@ -1976,6 +2130,17 @@
                 } else {
                     return { cardWidth: 100, cardHeight: 166, overlapOffset: 70, particleCount: 50 };
                 }
+            },
+            cleanup() {
+                const containers = ['u-cards-container', 'daily-cards-container', 'meanings-container'];
+                containers.forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        container.onclick = null;
+                        container.innerHTML = '';
+                    }
+                });
+                this._cardSelectHandlers = {};
             },
             init() {
                 this.loadDailyStatus();
@@ -2073,19 +2238,20 @@
                 window.scrollTo(0, 0);
             },
             hideAllSections() {
-                document.getElementById('home-section').style.display = 'none';
-                document.getElementById('reading-section').classList.remove('active');
-                document.getElementById('daily-draw-section').classList.remove('active');
-                document.getElementById('card-meanings-section').style.display = 'none';
+                this.$('home-section').style.display = 'none';
+                this.$('reading-section').classList.remove('active');
+                this.$('daily-draw-section').classList.remove('active');
+                this.$('card-meanings-section').style.display = 'none';
             },
             startReading() {
                 this.hideAllSections();
-                document.getElementById('reading-section').classList.add('active');
+                this.$('reading-section').classList.add('active');
                 this.state.currentView = 'reading';
                 this.resetReading();
                 window.scrollTo(0, 0);
             },
             resetReading() {
+                this.cleanup();
                 this.state.readingStep = 'question';
                 this.state.question = '';
                 this.state.spreadType = null;
@@ -2093,33 +2259,39 @@
                 this.state.currentDrawIndex = 0;
                 this.state.shuffledCards = [];
                 this.state.selectedCards = [];
-                document.getElementById('step-question').style.display = 'block';
-                document.getElementById('step-shuffle').classList.remove('active');
-                document.getElementById('step-draw').classList.remove('active');
-                document.getElementById('step-u-selection').classList.remove('active');
-                document.getElementById('step-result').classList.remove('active');
-                document.getElementById('question-input').value = '';
+                this.$('step-question').style.display = 'block';
+                this.$('step-shuffle').classList.remove('active');
+                this.$('step-draw').classList.remove('active');
+                this.$('step-u-selection').classList.remove('active');
+                this.$('step-result').classList.remove('active');
+                this.$('question-input').value = '';
                 document.querySelectorAll('.spread-option').forEach(o => o.classList.remove('selected'));
             },
             startShuffle() {
-                const question = document.getElementById('question-input').value.trim();
-                if (!question) {
-                    Modal.alert('请先输入你的问题');
+                const questionInput = this.$('question-input').value;
+                
+                // 使用验证器进行表单验证
+                const validation = InputValidator.validateQuestion(questionInput);
+                if (!validation.valid) {
+                    Modal.alert(validation.message);
                     return;
                 }
+                
                 if (!this.state.spreadType) {
                     Modal.alert('请选择一种牌阵');
                     return;
                 }
-                this.state.question = question;
+                
+                // 使用sanitize函数清理并转义用户输入
+                this.state.question = InputValidator.sanitize(questionInput);
                 this.state.readingStep = 'shuffle';
-                document.getElementById('step-question').style.display = 'none';
-                document.getElementById('step-shuffle').classList.add('active');
+                this.$('step-question').style.display = 'none';
+                this.$('step-shuffle').classList.add('active');
                 setTimeout(() => this.startDraw(), 3000);
             },
             startDraw() {
                 this.state.readingStep = 'u-selection';
-                document.getElementById('step-shuffle').classList.remove('active');
+                this.$('step-shuffle').classList.remove('active');
                 document.getElementById('step-u-selection').classList.add('active');
                 
                 // 完全打乱所有78张牌
@@ -2157,42 +2329,42 @@
                 }
                 return shuffled;
             },
-            renderUCards() {
-                const container = document.getElementById('u-cards-container');
+            _cardSelectHandlers: {},
+            renderCards(containerId, onSelect, onUpdate) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
                 container.innerHTML = '';
+                
+                this._cardSelectHandlers[containerId] = onSelect;
                 
                 const cards = this.state.shuffledCards;
                 const cardCount = cards.length;
                 const cardsPerRow = 26;
                 const totalRows = 3;
                 
-                // 动态检测屏幕尺寸并调整卡牌参数
-                const { cardWidth, cardHeight, overlapOffset } = this.getResponsiveConfig();
+                const { cardWidth, overlapOffset } = this.getResponsiveConfig();
                 const screenWidth = window.innerWidth;
                 
-                // 创建三行
+                const fragment = document.createDocumentFragment();
+                
                 for (let row = 0; row < totalRows; row++) {
                     const rowEl = document.createElement('div');
                     rowEl.className = 'card-row';
                     
-                    // 计算当前行的卡牌索引范围
                     const startIndex = row * cardsPerRow;
                     const endIndex = Math.min(startIndex + cardsPerRow, cardCount);
                     const cardsInThisRow = endIndex - startIndex;
                     
-                    // 计算行总宽度和起始位置
                     const totalStackWidth = (cardsInThisRow - 1) * overlapOffset + cardWidth;
                     let startX = 0;
                     
-                    // 居中显示
                     const containerWidth = container.offsetWidth || screenWidth;
                     if (totalStackWidth < containerWidth) {
                         startX = (containerWidth - totalStackWidth) / 2;
                     } else {
-                        startX = 50; // 左边距
+                        startX = 50;
                     }
                     
-                    // 添加当前行的卡牌
                     for (let i = startIndex; i < endIndex; i++) {
                         const card = cards[i];
                         const cardEl = document.createElement('div');
@@ -2200,33 +2372,42 @@
                         cardEl.dataset.index = i;
                         cardEl.dataset.cardId = card.id;
                         
-                        // 计算堆叠位置 - 垂直整齐排列，无倾斜
                         const cardPositionInRow = i - startIndex;
                         const leftPos = startX + (cardPositionInRow * overlapOffset);
                         
-                        // 设置卡牌位置 - 统一底部对齐，无偏移无旋转
                         cardEl.style.left = `${leftPos}px`;
-                        cardEl.style.bottom = '15px'; // 统一底部位置，匹配padding
-                        cardEl.style.transform = 'rotate(0deg)'; // 无倾斜角度
+                        cardEl.style.bottom = '15px';
+                        cardEl.style.transform = 'rotate(0deg)';
                         cardEl.style.zIndex = cardPositionInRow;
                         
-                        cardEl.innerHTML = `
-                            <div class="u-card-back"></div>
-                        `;
-                        
-                        cardEl.addEventListener('click', () => this.toggleCardSelection(i));
+                        cardEl.innerHTML = '<div class="u-card-back"></div>';
                         rowEl.appendChild(cardEl);
                     }
                     
-                    // 调整容器宽度以容纳所有卡牌
                     const requiredWidth = startX + (cardsInThisRow - 1) * overlapOffset + cardWidth + 100;
                     rowEl.style.width = `${requiredWidth}px`;
                     
-                    container.appendChild(rowEl);
+                    fragment.appendChild(rowEl);
                 }
                 
-                // 在卡牌渲染完成后更新选择信息
-                this.updateSelectionInfo();
+                container.appendChild(fragment);
+                
+                container.onclick = (e) => {
+                    const cardEl = e.target.closest('.u-card');
+                    if (cardEl) {
+                        const index = parseInt(cardEl.dataset.index);
+                        this._cardSelectHandlers[containerId](index);
+                    }
+                };
+                
+                if (onUpdate) onUpdate();
+            },
+            renderUCards() {
+                this.renderCards(
+                    'u-cards-container',
+                    (i) => this.toggleCardSelection(i),
+                    () => this.updateSelectionInfo()
+                );
             },
             toggleCardSelection(index) {
                 const cardIndex = this.state.selectedCards.indexOf(index);
@@ -2321,8 +2502,8 @@
                     <div class="tarot-card ${card.isReversed ? 'reversed' : ''} flipped">
                         <div class="card-back"></div>
                         <div class="card-face">
-                            <img src="${imageSrc}" alt="${card.name}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">
-                            <span class="card-name">${card.name}</span>
+                            <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(card.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">
+                            <span class="card-name">${escapeHtml(card.name)}</span>
                             <span class="card-orientation">${orientationText}</span>
                         </div>
                     </div>
@@ -2334,20 +2515,23 @@
                 document.getElementById('step-result').classList.add('active');
                 const resultCards = document.getElementById('result-cards');
                 resultCards.innerHTML = '';
+                
+                const fragment = document.createDocumentFragment();
                 this.state.drawnCards.forEach(card => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'result-card-wrapper';
                     wrapper.innerHTML = `
-                        <span class="position-label">${card.position}</span>
+                        <span class="position-label">${escapeHtml(card.position)}</span>
                         ${this.createCardHTML(card)}
                     `;
-                    resultCards.appendChild(wrapper);
+                    fragment.appendChild(wrapper);
                 });
+                resultCards.appendChild(fragment);
+                
                 this.generateInterpretation();
             },
             generateInterpretation() {
                 const content = document.getElementById('interpretation-content');
-                const question = this.state.question;
                 const cards = this.state.drawnCards;
                 let html = '';
                 cards.forEach(card => {
@@ -2356,10 +2540,10 @@
                     const orientation = card.isReversed ? '逆位' : '正位';
                     html += `
                         <div class="card-reading">
-                            <p><span class="reading-position">${card.position}：</span>
-                            <span class="reading-card-name">${card.name} ${orientation}</span></p>
-                            <p><strong>关键词：</strong>${keywords.join('、')}</p>
-                            <p>${meaning}</p>
+                            <p><span class="reading-position">${escapeHtml(card.position)}：</span>
+                            <span class="reading-card-name">${escapeHtml(card.name)} ${escapeHtml(orientation)}</span></p>
+                            <p><strong>关键词：</strong>${keywords.map(k => escapeHtml(k)).join('、')}</p>
+                            <p>${escapeHtml(meaning)}</p>
                         </div>
                     `;
                 });
@@ -2375,13 +2559,10 @@
             },
             startDailyCardSelection() {
                 const today = new Date().toDateString();
-                const saved = localStorage.getItem('tarotDaily');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (data.date === today) {
-                        Modal.alert('你今天已经抽过牌了，请明天再来！');
-                        return;
-                    }
+                const saved = Storage.get('tarotDaily');
+                if (saved && saved.date === today) {
+                    Modal.alert('你今天已经抽过牌了，请明天再来！');
+                    return;
                 }
                 document.getElementById('daily-draw-content').style.display = 'none';
                 document.getElementById('daily-selection-area').classList.add('active');
@@ -2397,61 +2578,11 @@
                 window.scrollTo(0, 0);
             },
             renderDailyCards() {
-                const container = document.getElementById('daily-cards-container');
-                container.innerHTML = '';
-                
-                const cards = this.state.shuffledCards;
-                const cardCount = cards.length;
-                const cardsPerRow = 26;
-                const totalRows = 3;
-                
-                const { cardWidth, cardHeight, overlapOffset } = this.getResponsiveConfig();
-                const screenWidth = window.innerWidth;
-                
-                for (let row = 0; row < totalRows; row++) {
-                    const rowEl = document.createElement('div');
-                    rowEl.className = 'card-row';
-                    
-                    const startIndex = row * cardsPerRow;
-                    const endIndex = Math.min(startIndex + cardsPerRow, cardCount);
-                    const cardsInThisRow = endIndex - startIndex;
-                    
-                    const totalStackWidth = (cardsInThisRow - 1) * overlapOffset + cardWidth;
-                    let startX = 0;
-                    
-                    const containerWidth = container.offsetWidth || screenWidth;
-                    if (totalStackWidth < containerWidth) {
-                        startX = (containerWidth - totalStackWidth) / 2;
-                    } else {
-                        startX = 50;
-                    }
-                    
-                    for (let i = startIndex; i < endIndex; i++) {
-                        const card = cards[i];
-                        const cardEl = document.createElement('div');
-                        cardEl.className = 'u-card';
-                        cardEl.dataset.index = i;
-                        cardEl.dataset.cardId = card.id;
-                        
-                        const cardPositionInRow = i - startIndex;
-                        const leftPos = startX + (cardPositionInRow * overlapOffset);
-                        
-                        cardEl.style.left = `${leftPos}px`;
-                        cardEl.style.bottom = '15px';
-                        cardEl.style.transform = 'rotate(0deg)';
-                        cardEl.style.zIndex = cardPositionInRow;
-                        
-                        cardEl.innerHTML = `<div class="u-card-back"></div>`;
-                        
-                        cardEl.addEventListener('click', () => this.toggleDailyCardSelection(i));
-                        rowEl.appendChild(cardEl);
-                    }
-                    
-                    const requiredWidth = startX + (cardsInThisRow - 1) * overlapOffset + cardWidth + 100;
-                    rowEl.style.width = `${requiredWidth}px`;
-                    
-                    container.appendChild(rowEl);
-                }
+                this.renderCards(
+                    'daily-cards-container',
+                    (i) => this.toggleDailyCardSelection(i),
+                    () => this.updateDailySelectionInfo()
+                );
             },
             toggleDailyCardSelection(index) {
                 const cardIndex = this.state.selectedCards.indexOf(index);
@@ -2501,10 +2632,10 @@
                 };
                 this.state.dailyDrawn = true;
                 
-                localStorage.setItem('tarotDaily', JSON.stringify({
+                Storage.set('tarotDaily', {
                     date: today,
                     card: this.state.dailyCard
-                }));
+                });
                 
                 this.addToHistory(this.state.dailyCard);
                 
@@ -2522,10 +2653,10 @@
                 
                 document.getElementById('daily-reading').innerHTML = `
                     <h4 style="font-family: var(--font-display); color: var(--rose-dark); margin-bottom: 1rem;">
-                        今日指引：${card.name} ${orientation}
+                        今日指引：${escapeHtml(card.name)} ${escapeHtml(orientation)}
                     </h4>
-                    <p><strong>关键词：</strong>${keywords.join('、')}</p>
-                    <p style="margin-top: 1rem;">${meaning}</p>
+                    <p><strong>关键词：</strong>${keywords.map(k => escapeHtml(k)).join('、')}</p>
+                    <p style="margin-top: 1rem;">${escapeHtml(meaning)}</p>
                 `;
                 document.getElementById('daily-reading').classList.remove('hidden');
                 
@@ -2540,33 +2671,27 @@
             },
             loadDailyStatus() {
                 const today = new Date().toDateString();
-                const saved = localStorage.getItem('tarotDaily');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (data.date === today) {
-                        this.state.dailyDrawn = true;
-                        this.state.dailyCard = data.card;
-                    }
+                const saved = Storage.get('tarotDaily');
+                if (saved && saved.date === today) {
+                    this.state.dailyDrawn = true;
+                    this.state.dailyCard = saved.card;
                 }
             },
             performDailyDraw() {
                 const today = new Date().toDateString();
-                const saved = localStorage.getItem('tarotDaily');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (data.date === today) {
-                        Modal.alert('你今天已经抽过牌了，请明天再来！');
-                        return;
-                    }
+                const saved = Storage.get('tarotDaily');
+                if (saved && saved.date === today) {
+                    Modal.alert('你今天已经抽过牌了，请明天再来！');
+                    return;
                 }
                 const card = tarotDatabase.drawRandomCard();
                 const isReversed = Math.random() < 0.3;
                 this.state.dailyCard = { ...card, isReversed, date: today };
                 this.state.dailyDrawn = true;
-                localStorage.setItem('tarotDaily', JSON.stringify({
+                Storage.set('tarotDaily', {
                     date: today,
                     card: this.state.dailyCard
-                }));
+                });
                 this.addToHistory(this.state.dailyCard);
                 this.updateDailyDrawUI();
             },
@@ -2586,10 +2711,10 @@
                     const orientation = card.isReversed ? '逆位' : '正位';
                     reading.innerHTML = `
                         <h4 style="font-family: var(--font-display); color: var(--rose-dark); margin-bottom: 1rem;">
-                            今日指引：${card.name} ${orientation}
+                            今日指引：${escapeHtml(card.name)} ${escapeHtml(orientation)}
                         </h4>
-                        <p><strong>关键词：</strong>${keywords.join('、')}</p>
-                        <p style="margin-top: 1rem;">${meaning}</p>
+                        <p><strong>关键词：</strong>${keywords.map(k => escapeHtml(k)).join('、')}</p>
+                        <p style="margin-top: 1rem;">${escapeHtml(meaning)}</p>
                     `;
                     reading.classList.remove('hidden');
                 } else {
@@ -2606,27 +2731,27 @@
                 }
             },
             addToHistory(card) {
-                let history = JSON.parse(localStorage.getItem('tarotHistory') || '[]');
+                let history = Storage.get('tarotHistory', []);
                 history.unshift({
                     date: new Date().toLocaleDateString('zh-CN'),
                     cardName: card.name,
                     orientation: card.isReversed ? '逆位' : '正位'
                 });
                 history = history.slice(0, 10);
-                localStorage.setItem('tarotHistory', JSON.stringify(history));
+                Storage.set('tarotHistory', history);
                 this.renderDailyHistory();
             },
             renderDailyHistory() {
                 const historyList = document.getElementById('history-list');
-                const history = JSON.parse(localStorage.getItem('tarotHistory') || '[]');
+                const history = Storage.get('tarotHistory', []);
                 if (history.length === 0) {
                     historyList.innerHTML = '<p style="text-align: center; color: var(--rose-light);">暂无历史记录</p>';
                     return;
                 }
                 historyList.innerHTML = history.map(item => `
                     <div class="history-item">
-                        <span class="history-date">${item.date}</span>
-                        <span class="history-card">${item.cardName} ${item.orientation}</span>
+                        <span class="history-date">${escapeHtml(item.date)}</span>
+                        <span class="history-card">${escapeHtml(item.cardName)} ${escapeHtml(item.orientation)}</span>
                     </div>
                 `).join('');
             },
@@ -2649,7 +2774,7 @@
                 container.innerHTML = categories.map(cat => `
                     <div class="category-group" data-category="${cat.key}">
                         <div class="category-header" data-category="${cat.key}">
-                            <span>${cat.icon} ${cat.name} (${tarotDatabase[cat.key].length}张)</span>
+                            <span>${escapeHtml(cat.icon)} ${escapeHtml(cat.name)} (${tarotDatabase[cat.key].length}张)</span>
                         </div>
                         <div class="category-cards" id="cards-${cat.key}">
                             ${tarotDatabase[cat.key].map(card => this.createCardItemHTML(card)).join('')}
@@ -2676,20 +2801,20 @@
                 return `
                     <div class="card-item" data-card-id="${card.id}">
                         <div class="card-item-header">
-                            <img src="${imageSrc}" alt="${card.name}" style="width:50px;height:75px;object-fit:cover;border-radius:5px;">
-                            <span class="card-name">${card.name}</span>
-                            <span class="card-name-en">${card.nameEn}</span>
+                            <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(card.name)}" style="width:50px;height:75px;object-fit:cover;border-radius:5px;">
+                            <span class="card-name">${escapeHtml(card.name)}</span>
+                            <span class="card-name-en">${escapeHtml(card.nameEn)}</span>
                         </div>
                         <div class="card-item-detail" id="detail-${card.id}">
                             <div class="card-section">
                                 <h4>正位</h4>
-                                <p class="card-keywords">${card.keywords.upright.join('、')}</p>
-                                <p>${card.upright}</p>
+                                <p class="card-keywords">${card.keywords.upright.map(k => escapeHtml(k)).join('、')}</p>
+                                <p>${escapeHtml(card.upright)}</p>
                             </div>
                             <div class="card-section">
                                 <h4>逆位</h4>
-                                <p class="card-keywords">${card.keywords.reversed.join('、')}</p>
-                                <p>${card.reversed}</p>
+                                <p class="card-keywords">${card.keywords.reversed.map(k => escapeHtml(k)).join('、')}</p>
+                                <p>${escapeHtml(card.reversed)}</p>
                             </div>
                         </div>
                     </div>
@@ -2733,160 +2858,67 @@
         };
 
         class Modal {
-            static _timeout = null;
-            static _keyHandler = null;
-            static _onClose = null;
+            static _state = { timeout: null, keyHandler: null, onClose: null, onConfirm: null };
+            static _container = document.getElementById('modal-container');
+            static _iconEl = document.getElementById('modal-icon');
+            static _messageEl = document.getElementById('modal-message');
+            static _actionsEl = document.getElementById('modal-actions');
+            static _icons = { info: 'info', success: 'check_circle', warning: 'warning', error: 'error' };
 
             static show(message, options = {}) {
-                const {
-                    icon = 'info',
-                    duration = 0,
-                    buttonText = '确定',
-                    onClose = null
-                } = options;
+                const { icon = 'info', duration = 0, buttonText = '确定', onClose = null,
+                    confirmText, cancelText, onConfirm, onCancel } = options;
+                const isConfirm = confirmText !== undefined;
 
-                const container = document.getElementById('modal-container');
-                const iconEl = document.getElementById('modal-icon');
-                const messageEl = document.getElementById('modal-message');
-                const actionsEl = document.getElementById('modal-actions');
+                this._iconEl.innerHTML = `<span class="material-icons">${this._icons[icon]}</span>`;
+                this._iconEl.className = `modal-icon ${icon}`;
+                this._messageEl.textContent = message;
 
-                const icons = {
-                    info: 'info',
-                    success: 'check_circle',
-                    warning: 'warning',
-                    error: 'error'
+                if (isConfirm) {
+                    this._actionsEl.innerHTML = `
+                        <button class="btn btn-secondary" id="modal-cancel-btn">${escapeHtml(cancelText || '取消')}</button>
+                        <button class="btn btn-primary" id="modal-confirm-btn">${escapeHtml(confirmText)}</button>
+                    `;
+                    document.getElementById('modal-cancel-btn').onclick = () => this.close('cancel');
+                    document.getElementById('modal-confirm-btn').onclick = () => this.close('confirm');
+                    this._state.onConfirm = onConfirm;
+                    this._state.onCancel = onCancel;
+                } else {
+                    this._actionsEl.innerHTML = `<button class="btn btn-primary" id="modal-ok-btn">${escapeHtml(buttonText)}</button>`;
+                    document.getElementById('modal-ok-btn').onclick = () => this.close();
+                    this._state.onClose = onClose;
+                }
+
+                this._container.classList.add('active');
+                if (duration > 0) this._state.timeout = setTimeout(() => this.close(), duration);
+
+                this._state.keyHandler = (e) => {
+                    if (e.key === 'Escape') this.close();
+                    if (e.key === 'Enter' && !isConfirm) this.close();
                 };
-
-                iconEl.innerHTML = `<span class="material-icons">${icons[icon]}</span>`;
-                iconEl.className = `modal-icon ${icon}`;
-                messageEl.textContent = message;
-
-                actionsEl.innerHTML = `
-                    <button class="btn btn-primary" id="modal-ok-btn">${buttonText}</button>
-                `;
-
-                document.getElementById('modal-ok-btn').onclick = () => this.close();
-
-                container.classList.add('active');
-                this._onClose = onClose;
-
-                if (duration > 0) {
-                    this._timeout = setTimeout(() => this.close(), duration);
-                }
-
-                this._keyHandler = (e) => {
-                    if (e.key === 'Escape' || e.key === 'Enter') {
-                        this.close();
-                    }
-                };
-                document.addEventListener('keydown', this._keyHandler);
+                document.addEventListener('keydown', this._state.keyHandler);
             }
 
-            static close() {
-                const container = document.getElementById('modal-container');
-                container.classList.remove('active');
-
-                if (this._timeout) {
-                    clearTimeout(this._timeout);
-                    this._timeout = null;
-                }
-                if (this._keyHandler) {
-                    document.removeEventListener('keydown', this._keyHandler);
-                    this._keyHandler = null;
-                }
-                if (this._onClose) {
-                    const callback = this._onClose;
-                    this._onClose = null;
-                    callback();
-                }
+            static close(action) {
+                this._container.classList.remove('active');
+                if (this._state.timeout) { clearTimeout(this._state.timeout); this._state.timeout = null; }
+                if (this._state.keyHandler) { document.removeEventListener('keydown', this._state.keyHandler); this._state.keyHandler = null; }
+                if (action === 'confirm' && this._state.onConfirm) { const cb = this._state.onConfirm; this._state.onConfirm = null; cb(); }
+                else if (action === 'cancel' && this._state.onCancel) { const cb = this._state.onCancel; this._state.onCancel = null; cb(); }
+                else if (this._state.onClose) { const cb = this._state.onClose; this._state.onClose = null; cb(); }
             }
 
-            static alert(message, options = {}) {
-                return this.show(message, { ...options, icon: 'warning' });
-            }
-
-            static success(message, options = {}) {
-                return this.show(message, { ...options, icon: 'success' });
-            }
-
-            static error(message, options = {}) {
-                return this.show(message, { ...options, icon: 'error' });
-            }
-
-            static info(message, options = {}) {
-                return this.show(message, { ...options, icon: 'info' });
-            }
+            static alert(message, options = {}) { return this.show(message, { ...options, icon: 'warning' }); }
+            static success(message, options = {}) { return this.show(message, { ...options, icon: 'success' }); }
+            static error(message, options = {}) { return this.show(message, { ...options, icon: 'error' }); }
+            static info(message, options = {}) { return this.show(message, { ...options, icon: 'info' }); }
+            static confirm(message, options = {}) { return this.show(message, { confirmText: options.confirmText || '确认', cancelText: options.cancelText || '取消', onConfirm: options.onConfirm, onCancel: options.onCancel, icon: 'warning' }); }
         }
 
         class ConfirmDialog {
-            static _onConfirm = null;
-            static _onCancel = null;
-            static _keyHandler = null;
-
-            static show(message, options = {}) {
-                const {
-                    title = '确认',
-                    confirmText = '确认',
-                    cancelText = '取消',
-                    onConfirm = null,
-                    onCancel = null
-                } = options;
-
-                const container = document.getElementById('modal-container');
-                const iconEl = document.getElementById('modal-icon');
-                const messageEl = document.getElementById('modal-message');
-                const actionsEl = document.getElementById('modal-actions');
-
-                iconEl.innerHTML = `<span class="material-icons">help_outline</span>`;
-                iconEl.className = 'modal-icon warning';
-                messageEl.textContent = message;
-
-                actionsEl.innerHTML = `
-                    <button class="btn btn-secondary" id="confirm-cancel-btn">${cancelText}</button>
-                    <button class="btn btn-primary" id="confirm-confirm-btn">${confirmText}</button>
-                `;
-
-                document.getElementById('confirm-cancel-btn').onclick = () => this.cancel();
-                document.getElementById('confirm-confirm-btn').onclick = () => this.confirm();
-
-                container.classList.add('active');
-                this._onConfirm = onConfirm;
-                this._onCancel = onCancel;
-
-                this._keyHandler = (e) => {
-                    if (e.key === 'Escape') this.cancel();
-                    if (e.key === 'Enter') this.confirm();
-                };
-                document.addEventListener('keydown', this._keyHandler);
-            }
-
-            static confirm() {
-                const container = document.getElementById('modal-container');
-                container.classList.remove('active');
-                if (this._keyHandler) {
-                    document.removeEventListener('keydown', this._keyHandler);
-                    this._keyHandler = null;
-                }
-                if (this._onConfirm) {
-                    const callback = this._onConfirm;
-                    this._onConfirm = null;
-                    callback();
-                }
-            }
-
-            static cancel() {
-                const container = document.getElementById('modal-container');
-                container.classList.remove('active');
-                if (this._keyHandler) {
-                    document.removeEventListener('keydown', this._keyHandler);
-                    this._keyHandler = null;
-                }
-                if (this._onCancel) {
-                    const callback = this._onCancel;
-                    this._onCancel = null;
-                    callback();
-                }
-            }
+            static show(message, options = {}) { Modal.confirm(message, options); }
+            static confirm() { Modal.close('confirm'); }
+            static cancel() { Modal.close('cancel'); }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2894,4 +2926,4 @@
         });
     </script>
 </body>
-</html><p class="section-subtitle">专注于你心中的问题，让塔罗牌为你揭示答案</p><p class="section-subtitle">专注于你心中的问题，让塔罗牌为你揭示答案</p>
+</html>
