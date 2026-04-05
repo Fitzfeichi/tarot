@@ -128,7 +128,7 @@ ${cardsInfo}
 - 避免过于技术性的术语，保持通俗易懂
 - 结合直觉与理性，提供平衡的视角
 - 关注用户的情感需求，给予正向支持
-- 字数控制在800-1200字`;
+- 字数控制在300-500字`;
 }
 
 async function callMinimaxAI(messages, apiKey) {
@@ -141,7 +141,7 @@ async function callMinimaxAI(messages, apiKey) {
         body: JSON.stringify({
             model: 'MiniMax-M2.7',
             messages: messages,
-            max_tokens: 2000,
+            max_tokens: 800,
             temperature: 0.7
         })
     });

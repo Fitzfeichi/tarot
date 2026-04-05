@@ -10,7 +10,7 @@
 [functions."tarot-ai"]
   runtime = "nodejs18.x"
   memory = 256
-  max_timeout = 10
+  max_timeout = 30
 
 [[headers]]
   for = "/.netlify/functions/*"
