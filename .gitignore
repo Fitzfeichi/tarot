@@ -1,0 +1,6 @@
+netlify/functions/.env.example
+.env.netlify.example
+AI_INTEGRATION_GUIDE.md
+DEPLOYMENT_CHECKLIST.md
+PROJECT_SUMMARY.md
+QUICK_START.md

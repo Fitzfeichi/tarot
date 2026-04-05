@@ -310,6 +310,142 @@
             color: white;
         }
 
+        .btn-ai {
+            background: linear-gradient(135deg, var(--gold) 0%, #E8C66A 100%);
+            color: var(--charcoal);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 20px rgba(201, 169, 97, 0.4);
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(201, 169, 97, 0.6);
+        }
+
+        .btn-ai:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-ai .material-icons {
+            font-size: 1.3rem;
+        }
+
+        .ai-interpretation-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .ai-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .ai-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--gold);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-loading p {
+            color: var(--rose);
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .ai-interpretation-content {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            line-height: 1.8;
+            box-shadow: 0 4px 20px var(--shadow);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .ai-interpretation-content h4 {
+            font-family: var(--font-display);
+            color: var(--rose-dark);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .ai-interpretation-content p {
+            margin-bottom: 1rem;
+            text-indent: 2em;
+        }
+
+        .ai-interpretation-content .highlight {
+            background: linear-gradient(to right, var(--gold-glow), transparent);
+            padding: 0.5rem 1rem;
+            border-left: 3px solid var(--gold);
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        .ai-interpretation-content .section-title {
+            font-family: var(--font-display);
+            color: var(--rose-dark);
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gold);
+        }
+
+        .ai-interpretation-content .card-highlight {
+            background: linear-gradient(135deg, rgba(201, 169, 97, 0.1) 0%, rgba(201, 169, 97, 0.05) 100%);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .ai-interpretation-content .card-highlight strong {
+            color: var(--rose-dark);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-error {
+            background: rgba(255, 100, 100, 0.1);
+            border: 1px solid #ff6666;
+            color: #cc4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         .btn-group {
             display: flex;
             gap: var(--space-md);
@@ -1682,6 +1818,17 @@
                 <div class="interpretation">
                     <h3>🔮 塔罗解读</h3>
                     <div class="interpretation-content" id="interpretation-content"></div>
+                    <div class="ai-interpretation-section" id="ai-interpretation-section">
+                        <button class="btn btn-ai" id="btn-ai-interpret" onclick="app.requestAIInterpretation()">
+                            <span class="material-icons">auto_awesome</span>
+                            <span id="ai-btn-text">✨ AI智能深度解读</span>
+                        </button>
+                        <div class="ai-loading hidden" id="ai-loading">
+                            <div class="ai-loading-spinner"></div>
+                            <p id="ai-loading-text">正在召唤宇宙智慧...</p>
+                        </div>
+                        <div class="ai-interpretation-content hidden" id="ai-interpretation-content"></div>
+                    </div>
                 </div>
                 <div class="btn-group" style="margin-top: var(--space-lg);">
                     <button class="btn btn-primary" onclick="app.startReading()">
@@ -2549,6 +2696,117 @@
                 });
                 html += `<div class="summary"><strong>综合指引：</strong>感谢你使用塔罗占卜。请记住，塔罗牌只是提供指引，最终的决定和行动掌握在你自己手中。保持开放的心态，相信你的直觉。</div>`;
                 content.innerHTML = html;
+            },
+
+            async requestAIInterpretation() {
+                const btn = document.getElementById('btn-ai-interpret');
+                const loading = document.getElementById('ai-loading');
+                const content = document.getElementById('ai-interpretation-content');
+                const btnText = document.getElementById('ai-btn-text');
+
+                if (content.classList.contains('hidden') === false) {
+                    content.classList.add('hidden');
+                    btnText.textContent = '✨ AI智能深度解读';
+                    btn.disabled = false;
+                    return;
+                }
+
+                btn.disabled = true;
+                btnText.textContent = '正在准备...';
+                loading.classList.remove('hidden');
+                content.classList.add('hidden');
+
+                const question = this.state.question || '关于我的当前状况';
+                const cards = this.state.drawnCards.map(card => ({
+                    id: card.id,
+                    name: card.name,
+                    nameEn: card.nameEn,
+                    isReversed: card.isReversed,
+                    position: card.position,
+                    keywords: card.keywords,
+                    upright: card.upright,
+                    reversed: card.reversed
+                }));
+                const spreadType = this.state.spreadType || 'single';
+
+                try {
+                    const userId = this.getUserId();
+                    const response = await fetch('/.netlify/functions/tarot-ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-User-ID': userId
+                        },
+                        body: JSON.stringify({
+                            question,
+                            cards,
+                            spreadType
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    loading.classList.add('hidden');
+
+                    if (!response.ok) {
+                        throw new Error(data.error || '解读服务暂时不可用');
+                    }
+
+                    if (data.success && data.interpretation) {
+                        content.innerHTML = `<h4>🌟 AI智能解读</h4>${this.formatAIInterpretation(data.interpretation)}`;
+                        content.classList.remove('hidden');
+                        btnText.textContent = '🔄 再次解读';
+                        btn.disabled = false;
+                    } else {
+                        throw new Error('解读生成失败');
+                    }
+                } catch (error) {
+                    loading.classList.add('hidden');
+                    content.innerHTML = `<div class="ai-error">
+                        <strong>⚠️ 解读暂时不可用</strong><br>
+                        ${escapeHtml(error.message)}<br>
+                        <small>请稍后再试，或联系网站管理员</small>
+                    </div>`;
+                    content.classList.remove('hidden');
+                    btnText.textContent = '✨ 重试AI解读';
+                    btn.disabled = false;
+                }
+            },
+
+            formatAIInterpretation(text) {
+                if (!text) return '<p>解读内容为空</p>';
+
+                let formatted = text
+                    .replace(/【牌面总览】/g, '<div class="section-title">【牌面总览】</div>')
+                    .replace(/【牌卡组合】/g, '<div class="section-title">【牌卡组合】</div>')
+                    .replace(/【时空脉络】/g, '<div class="section-title">【时空脉络】</div>')
+                    .replace(/【智慧指引】/g, '<div class="section-title">【智慧指引】</div>')
+                    .replace(/【深层启示】/g, '<div class="section-title">【深层启示】</div>');
+
+                const paragraphs = formatted.split(/\n\n+/);
+                let html = paragraphs.map(p => {
+                    p = p.trim();
+                    if (!p) return '';
+
+                    if (p.startsWith('<div class="section-title">')) {
+                        return p;
+                    }
+
+                    p = p.replace(/\n/g, '<br>');
+
+                    return `<p>${p}</p>`;
+                }).join('');
+
+                return html;
+            },
+
+            getUserId() {
+                let userId = sessionStorage.getItem('tarotUserId');
+                if (!userId) {
+                    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    sessionStorage.setItem('tarotUserId', userId);
+                }
+                return userId;
             },
             startDailyDraw() {
                 this.hideAllSections();
