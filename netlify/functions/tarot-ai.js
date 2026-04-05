@@ -131,15 +131,18 @@ ${cardsInfo}
 - 字数控制在300-500字`;
 }
 
-async function callMinimaxAI(messages, apiKey) {
-    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+async function callAI(messages, apiKey) {
+    const endpoint = process.env.VOLCENGINE_API_ENDPOINT || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+    const model = process.env.VOLCENGINE_MODEL || 'doubao-seed-2-0-mini-260215';
+
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-            model: 'MiniMax-M2.7',
+            model: model,
             messages: messages,
             max_tokens: 800,
             temperature: 0.7
@@ -147,8 +150,9 @@ async function callMinimaxAI(messages, apiKey) {
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API调用失败: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`API调用失败: ${response.status}`);
     }
 
     const data = await response.json();
@@ -225,9 +229,9 @@ exports.handler = async function(event, context) {
         };
     }
 
-    const apiKey = process.env.MINIMAX_API_KEY;
+    const apiKey = process.env.VOLCENGINE_API_KEY;
     if (!apiKey) {
-        console.error('MINIMAX_API_KEY未配置');
+        console.error('VOLCENGINE_API_KEY未配置');
         return {
             statusCode: 500,
             headers,
@@ -244,7 +248,7 @@ exports.handler = async function(event, context) {
             { role: 'user', content: userPrompt }
         ];
 
-        const interpretation = await callMinimaxAI(messages, apiKey);
+        const interpretation = await callAI(messages, apiKey);
 
         return {
             statusCode: 200,
